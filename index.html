@@ -7,94 +7,70 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Inter',sans-serif;
+  background:linear-gradient(135deg,#1a0f0f,#3b1f1f,#2a1515);
+  color:#f6e9e0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #1a0f0f, #3b1f1f, #2a1515);
-  color: #f6e9e0;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.container{
+  width:90%;
+  max-width:900px;
+  padding:50px;
+  background:rgba(30,15,15,0.85);
+  backdrop-filter:blur(20px);
+  border-radius:20px;
+  box-shadow:0 25px 50px rgba(0,0,0,0.6);
 }
-
-.container {
-  width: 90%;
-  max-width: 900px;
-  padding: 50px;
-  background: rgba(30, 15, 15, 0.85);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+h1{
+  font-family:'Playfair Display',serif;
+  font-size:2.5rem;
+  margin-bottom:10px;
+  text-align:center;
+  letter-spacing:2px;
 }
-
-h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  text-align: center;
-  letter-spacing: 2px;
+.subtitle{text-align:center;margin-bottom:10px;opacity:0.7;}
+.hours{text-align:center;margin-bottom:30px;font-size:0.9rem;opacity:0.5;}
+select,button{
+  width:100%;
+  padding:15px;
+  margin-bottom:20px;
+  border-radius:12px;
+  border:none;
+  font-size:1rem;
 }
-
-.subtitle {
-  text-align: center;
-  margin-bottom: 40px;
-  opacity: 0.7;
+select{background:#2e1b1b;color:#fff;}
+button{
+  background:linear-gradient(135deg,#7a3e3e,#c98b6b);
+  color:white;
+  cursor:pointer;
+  transition:0.3s ease;
 }
-
-select, button {
-  width: 100%;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 12px;
-  border: none;
-  font-size: 1rem;
+button:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 20px rgba(0,0,0,0.4);
 }
-
-select {
-  background: #2e1b1b;
-  color: #fff;
+.prompt-box{
+  margin-top:20px;
+  padding:25px;
+  border-radius:15px;
+  background:rgba(255,255,255,0.05);
+  min-height:170px;
+  line-height:1.8;
+  font-size:1.05rem;
+  opacity:0;
+  transition:opacity 0.4s ease;
 }
-
-button {
-  background: linear-gradient(135deg, #7a3e3e, #c98b6b);
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
-
-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-}
-
-.prompt-box {
-  margin-top: 30px;
-  padding: 25px;
-  border-radius: 15px;
-  background: rgba(255,255,255,0.05);
-  min-height: 120px;
-  line-height: 1.6;
-  font-size: 1.05rem;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.prompt-box.show {
-  opacity: 1;
-}
-
-.footer {
-  margin-top: 30px;
-  text-align: center;
-  font-size: 0.8rem;
-  opacity: 0.5;
+.prompt-box.show{opacity:1;}
+.footer{
+  margin-top:30px;
+  text-align:center;
+  font-size:0.8rem;
+  opacity:0.5;
 }
 </style>
 </head>
@@ -102,7 +78,8 @@ button:hover {
 
 <div class="container">
   <h1>AMÈRE</h1>
-  <p class="subtitle">Prompts</p>
+  <p class="subtitle">Plot Generator</p>
+  <p class="hours">Open Daily • 09:00 — 19:00</p>
 
   <select id="jobSelect">
     <option value="">Select Your Role</option>
@@ -115,9 +92,7 @@ button:hover {
   </select>
 
   <button onclick="generatePrompt()">Generate Plot Idea</button>
-
   <div class="prompt-box" id="promptBox"></div>
-
   <div class="footer">AMÈRE — Where stories melt like chocolate.</div>
 </div>
 
@@ -125,65 +100,133 @@ button:hover {
 
 const usedPrompts = new Set();
 
-const themes = [
-  "a sudden VIP visit",
-  "a mysterious anonymous order",
-  "a viral social media controversy",
-  "an unexpected ingredient shortage",
-  "a luxury brand collaboration offer",
-  "a staff conflict during peak hours",
-  "a customer with hidden intentions",
-  "a last-minute event booking",
-  "a secret recipe discovery",
-  "a broken refrigeration system at midnight",
-  "a rival boutique spying on operations",
-  "a surprise influencer review",
-  "a missing shipment",
-  "a loyal customer demanding change",
-  "an internal betrayal",
-  "a forgotten anniversary order",
-  "a late-night confession between coworkers",
-  "a chocolate competition invitation"
+const timeContexts = [
+  "At 08:45, just before opening",
+  "At 09:00 sharp as the doors unlock",
+  "Around 10:30 in the calm morning light",
+  "During the 13:00 afternoon rush",
+  "At 16:40 as golden hour filters through the glass",
+  "At 18:55, five minutes before closing",
+  "At 19:15 after the doors are locked"
+];
+
+const events = [
+  "a VIP guest arrives without notice",
+  "a premium chocolate batch shows subtle flaws",
+  "a staff disagreement becomes visible to customers",
+  "a collaboration proposal demands an immediate answer",
+  "a transaction discrepancy appears in the system",
+  "a social media complaint gains sudden traction",
+  "inventory numbers fail to align",
+  "a custom order turns emotionally complicated"
 ];
 
 const tensions = [
-  "forcing you to make a risky decision",
-  "challenging your leadership skills",
-  "testing your loyalty to the brand",
-  "threatening the reputation of AMÈRE",
-  "revealing hidden emotions",
-  "pushing the team to their limits",
-  "creating a moral dilemma",
-  "exposing secrets within the staff",
-  "risking financial stability",
-  "turning a normal day into chaos"
+  "and the atmosphere shifts instantly",
+  "forcing a decision that cannot be delayed",
+  "while everyone pretends nothing is wrong",
+  "and silence grows heavier by the minute",
+  "threatening the balance inside the store",
+  "revealing tension that has been building for weeks"
 ];
 
-function generatePrompt() {
-  const job = document.getElementById("jobSelect").value;
-  const box = document.getElementById("promptBox");
+const consequences = [
+  "The consequences may outlast today.",
+  "Someone will quietly remember your response.",
+  "Trust inside AMÈRE shifts in subtle ways.",
+  "Reputation stands on fragile ground.",
+  "Tomorrow may begin differently than expected."
+];
 
-  if (!job) {
-    box.innerHTML = "Please select a role first.";
+const roleDepth = {
+
+Owner:[
+  "Long-term strategy collides with personal pride.",
+  "Expansion plans suddenly feel unstable.",
+  "Authority is tested without warning.",
+  "Your vision for AMÈRE faces resistance."
+],
+
+Manager:[
+  "The team looks to you for immediate composure.",
+  "Order must be restored without visible panic.",
+  "Authority and empathy pull in opposite directions.",
+  "Your leadership style is silently evaluated."
+],
+
+Cashier:[
+  "What seems routine becomes unexpectedly personal.",
+  "Protocol clashes with instinct.",
+  "You notice details others overlook.",
+  "A simple exchange carries unusual weight."
+],
+
+Marketing:[
+  "Brand perception begins to fluctuate.",
+  "Public narrative slips beyond your control.",
+  "Creativity feels like both weapon and risk.",
+  "Visibility turns into vulnerability."
+],
+
+Stocker:[
+  "Small inconsistencies hint at larger structural problems.",
+  "Behind-the-scenes cracks slowly emerge.",
+  "Responsibility feels heavy yet unseen.",
+  "Integrity conflicts with quiet loyalty."
+],
+
+Chocolatier:[
+  "Perfection suddenly feels unreachable.",
+  "Art and expectation collide in the kitchen.",
+  "Flavor becomes emotion rather than technique.",
+  "Pressure dulls creative instinct."
+]
+
+};
+
+function randomItem(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function generatePrompt(){
+
+  const job=document.getElementById("jobSelect").value;
+  const box=document.getElementById("promptBox");
+
+  if(!job){
+    box.innerHTML="Select a role first.";
     box.classList.add("show");
     return;
   }
 
   let prompt;
-  let attempts = 0;
+  let attempts=0;
 
-  do {
-    const theme = themes[Math.floor(Math.random() * themes.length)];
-    const tension = tensions[Math.floor(Math.random() * tensions.length)];
+  do{
 
-    prompt = `As the ${job} of AMÈRE, ${theme} unfolds, ${tension}. How do you handle the situation, and what consequences follow for you and the team?`;
+    const time=randomItem(timeContexts);
+    const event=randomItem(events);
+    const tension=randomItem(tensions);
+    const result=randomItem(consequences);
+    const depth=randomItem(roleDepth[job]);
+
+    const structures=[
+      `${time}, ${event}, ${tension}. ${depth} ${result}`,
+      `${time} — ${event}. ${depth} ${tension}. ${result}`,
+      `${depth} ${time.toLowerCase()}, ${event}, ${tension}. ${result}`,
+      `${time}. ${event}. ${depth} ${result}`
+    ];
+
+    prompt=randomItem(structures);
+
     attempts++;
-    if (attempts > 100) break;
-  } while (usedPrompts.has(prompt));
+    if(attempts>400)break;
+
+  }while(usedPrompts.has(prompt));
 
   usedPrompts.add(prompt);
 
-  box.innerHTML = prompt;
+  box.innerHTML=prompt;
   box.classList.add("show");
 }
 
