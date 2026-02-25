@@ -1,257 +1,193 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AMÈRE: Bitter Origins</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMÈRE Plot Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
 <style>
-body{
- background:#0e0a0a;
- color:#f4e4d0;
- font-family:monospace;
- padding:20px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-button{
- background:#3a1f1f;
- color:white;
- border:none;
- padding:6px 10px;
- margin:3px;
- cursor:pointer;
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #1a0f0f, #3b1f1f, #2a1515);
+  color: #f6e9e0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-button:hover{background:#7a2f2f;}
-.panel{
- border:1px solid #5a3a3a;
- padding:10px;
- margin-top:10px;
+
+.container {
+  width: 90%;
+  max-width: 900px;
+  padding: 50px;
+  background: rgba(30, 15, 15, 0.85);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.6);
 }
-.log{
- height:140px;
- overflow-y:auto;
- background:#1a1111;
- padding:5px;
- font-size:13px;
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 40px;
+  opacity: 0.7;
+}
+
+select, button {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+}
+
+select {
+  background: #2e1b1b;
+  color: #fff;
+}
+
+button {
+  background: linear-gradient(135deg, #7a3e3e, #c98b6b);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+
+.prompt-box {
+  margin-top: 30px;
+  padding: 25px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.05);
+  min-height: 120px;
+  line-height: 1.6;
+  font-size: 1.05rem;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.prompt-box.show {
+  opacity: 1;
+}
+
+.footer {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.5;
 }
 </style>
 </head>
 <body>
 
-<h1>🍫 AMÈRE: Power & Profit</h1>
+<div class="container">
+  <h1>AMÈRE</h1>
+  <p class="subtitle">Prompts</p>
 
-<div id="stats" class="panel"></div>
-<div id="actions" class="panel"></div>
-<div id="log" class="panel log"></div>
+  <select id="jobSelect">
+    <option value="">Select Your Role</option>
+    <option value="Owner">Owner</option>
+    <option value="Manager">Manager</option>
+    <option value="Cashier">Cashier</option>
+    <option value="Marketing">Marketing</option>
+    <option value="Stocker">Stocker</option>
+    <option value="Chocolatier">Chocolatier</option>
+  </select>
+
+  <button onclick="generatePrompt()">Generate Plot Idea</button>
+
+  <div class="prompt-box" id="promptBox"></div>
+
+  <div class="footer">AMÈRE — Where stories melt like chocolate.</div>
+</div>
 
 <script>
 
-let day=1;
-let energy=10;
-let gold=250;
-let reputation=70;
-let morale=80;
+const usedPrompts = new Set();
 
-let inventory={cacao:5,sugar:5,fire:2};
-let stock={basic:0,spicy:0};
+const themes = [
+  "a sudden VIP visit",
+  "a mysterious anonymous order",
+  "a viral social media controversy",
+  "an unexpected ingredient shortage",
+  "a luxury brand collaboration offer",
+  "a staff conflict during peak hours",
+  "a customer with hidden intentions",
+  "a last-minute event booking",
+  "a secret recipe discovery",
+  "a broken refrigeration system at midnight",
+  "a rival boutique spying on operations",
+  "a surprise influencer review",
+  "a missing shipment",
+  "a loyal customer demanding change",
+  "an internal betrayal",
+  "a forgotten anniversary order",
+  "a late-night confession between coworkers",
+  "a chocolate competition invitation"
+];
 
-let relations={
- critic:50,
- supplier:50,
- noir:50,
- investor:50,
- activist:50
-};
+const tensions = [
+  "forcing you to make a risky decision",
+  "challenging your leadership skills",
+  "testing your loyalty to the brand",
+  "threatening the reputation of AMÈRE",
+  "revealing hidden emotions",
+  "pushing the team to their limits",
+  "creating a moral dilemma",
+  "exposing secrets within the staff",
+  "risking financial stability",
+  "turning a normal day into chaos"
+];
 
-function log(t){
- document.getElementById("log").innerHTML+="<div>"+t+"</div>";
- let box=document.getElementById("log");
- box.scrollTop=box.scrollHeight;
+function generatePrompt() {
+  const job = document.getElementById("jobSelect").value;
+  const box = document.getElementById("promptBox");
+
+  if (!job) {
+    box.innerHTML = "Please select a role first.";
+    box.classList.add("show");
+    return;
+  }
+
+  let prompt;
+  let attempts = 0;
+
+  do {
+    const theme = themes[Math.floor(Math.random() * themes.length)];
+    const tension = tensions[Math.floor(Math.random() * tensions.length)];
+
+    prompt = `As the ${job} of AMÈRE, ${theme} unfolds, ${tension}. How do you handle the situation, and what consequences follow for you and the team?`;
+    attempts++;
+    if (attempts > 100) break;
+  } while (usedPrompts.has(prompt));
+
+  usedPrompts.add(prompt);
+
+  box.innerHTML = prompt;
+  box.classList.add("show");
 }
-
-function update(){
- document.getElementById("stats").innerHTML=`
- Day ${day} | ⚡ ${energy}/10<br>
- 💰 ${gold} | ⭐ ${reputation} | 🧠 ${morale}<br>
- Stock → Basic:${stock.basic} Spicy:${stock.spicy}<br>
- Relasi → Critic:${relations.critic} |
- Supplier:${relations.supplier} |
- Noir:${relations.noir} |
- Investor:${relations.investor} |
- Activist:${relations.activist}
- `;
-}
-
-function useEnergy(){
- energy--;
- if(energy<=0){
-   nextDay();
- }
-}
-
-function main(){
- update();
- document.getElementById("actions").innerHTML=`
- <button onclick="craft()">🍫 Craft</button>
- <button onclick="sell()">🏪 Sell Chocolate</button>
- <button onclick="explore()">🌲 Gather</button>
- <button onclick="businessChoice()">⚖ Business Choice</button>
- <button onclick="interact()">💬 Political Move</button>
- `;
-}
-
-function craft(){
- if(inventory.cacao>=1 && inventory.sugar>=1){
-  inventory.cacao--; inventory.sugar--;
-  stock.basic++; reputation+=2;
-  log("Basic dibuat.");
- }
- if(inventory.cacao>=1 && inventory.fire>=1){
-  inventory.cacao--; inventory.fire--;
-  stock.spicy++; reputation+=4;
-  log("Spicy dibuat.");
- }
- useEnergy(); update();
-}
-
-function sell(){
- let income=0;
- if(stock.basic>0){
-  income+=stock.basic*30;
-  stock.basic=0;
- }
- if(stock.spicy>0){
-  income+=stock.spicy*50;
-  stock.spicy=0;
- }
- if(income>0){
-  gold+=income;
-  reputation+=3;
-  log("Semua stok terjual. +"+income+" gold");
- }else{
-  log("Tidak ada stok untuk dijual.");
- }
- useEnergy(); update();
-}
-
-function explore(){
- inventory.cacao+=2;
- inventory.sugar+=1;
- if(Math.random()>0.8){
-  morale-=5;
-  log("Kelelahan saat mencari bahan.");
- }
- log("Bahan terkumpul.");
- useEnergy(); update();
-}
-
-function businessChoice(){
- document.getElementById("actions").innerHTML=`
- Pilih strategi:<br>
- <button onclick="aggressive()">Agresif (Profit tinggi)</button>
- <button onclick="ethical()">Etis (Reputasi naik)</button>
- <button onclick="main()">⬅</button>
- `;
-}
-
-function aggressive(){
- gold+=50;
- reputation-=5;
- relations.activist-=10;
- relations.noir+=10;
- log("Strategi agresif. Aktivis marah.");
- useEnergy(); main();
-}
-
-function ethical(){
- gold-=20;
- reputation+=10;
- relations.activist+=10;
- relations.noir-=5;
- log("Strategi etis dipilih.");
- useEnergy(); main();
-}
-
-function interact(){
- document.getElementById("actions").innerHTML=`
- Manuver politik:<br>
- <button onclick="allyNoir()">Aliansi Noir</button>
- <button onclick="exposeNoir()">Expose Noir</button>
- <button onclick="seekInvestor()">Cari Investor</button>
- <button onclick="main()">⬅</button>
- `;
-}
-
-function allyNoir(){
- relations.noir+=15;
- reputation-=5;
- log("Kamu mulai dekat dengan Noir.");
- useEnergy(); main();
-}
-
-function exposeNoir(){
- relations.noir-=20;
- reputation+=10;
- log("Kamu menyerang Noir di publik.");
- useEnergy(); main();
-}
-
-function seekInvestor(){
- if(relations.investor>60){
-  gold+=150;
-  reputation+=5;
-  log("Investor mendukungmu.");
- }else{
-  log("Investor belum percaya.");
- }
- useEnergy(); main();
-}
-
-function randomEvent(){
- let r=Math.random();
- if(r<0.25){
-  gold-=50;
-  log("🕶 Sabotase misterius! -50 gold");
- }
- else if(r<0.5){
-  reputation+=10;
-  log("⭐ Review bagus dari Critic!");
- }
- else if(r<0.75){
-  inventory.cacao+=3;
-  log("Panen kakao melimpah.");
- }
- else{
-  morale+=10;
-  log("Festival kota meningkatkan semangat.");
- }
-}
-
-function nextDay(){
- day++;
- energy=10;
- morale-=3;
- randomEvent();
- checkEnd();
- update();
- main();
-}
-
-function checkEnd(){
- if(gold<=0) end("Bangkrut.");
- if(reputation>=300) end("👑 AMÈRE Menguasai Kota!");
- if(relations.noir>=150) end("🕶 Kamu bergabung dengan Noir Dominion.");
- if(relations.activist<=0) end("Skandal publik menghancurkanmu.");
- if(morale<=0) end("Kamu menyerah.");
-}
-
-function end(msg){
- document.getElementById("actions").innerHTML="";
- document.getElementById("stats").innerHTML="";
- document.getElementById("log").innerHTML=
- "<h2>GAME OVER</h2>"+msg+
- "<br><button onclick='location.reload()'>Main Lagi</button>";
-}
-
-main();
 
 </script>
+
 </body>
 </html>
